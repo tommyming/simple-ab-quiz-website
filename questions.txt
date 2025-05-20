@@ -1,0 +1,20 @@
+Would you rather use tabs or spaces?
+Would you rather code in Python or JavaScript?
+Would you rather use Vim or Emacs?
+Would you rather work on frontend or backend?
+Would you rather debug code or write documentation?
+Would you rather use dark mode or light mode?
+Would you rather work remotely or in an office?
+Would you rather do pair programming or solo programming?
+Would you rather use GitHub or GitLab?
+Would you rather write tests first or code first?
+Would you rather use a Mac or a PC for development?
+Would you rather use REST APIs or GraphQL?
+Would you rather refactor old code or write new features?
+Would you rather attend a hackathon or a conference?
+Would you rather use TypeScript or JavaScript?
+Would you rather work at a startup or a big tech company?
+Would you rather use Docker or Vagrant?
+Would you rather do code reviews or be reviewed?
+Would you rather use Slack or Microsoft Teams?
+Would you rather automate tasks with scripts or do them manually? 
