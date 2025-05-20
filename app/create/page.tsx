@@ -34,6 +34,14 @@ export default function CreateQuestions() {
     const savedQuestions = localStorage.getItem("abQuestions")
     if (savedQuestions) {
       setQuestions(JSON.parse(savedQuestions))
+    } else {
+      // Fetch from API if not in localStorage
+      fetch("/api/questions")
+        .then((res) => res.json())
+        .then((data) => {
+          setQuestions(data)
+          localStorage.setItem("abQuestions", JSON.stringify(data))
+        })
     }
 
     const savedTitle = localStorage.getItem("quizTitle")
@@ -161,14 +169,14 @@ export default function CreateQuestions() {
                     <div className="flex justify-between items-start">
                       <div className="space-y-4 w-full">
                         <div>
-                          <h3 className="text-xl font-medium">{q.question}</h3>
+                          <h3 className="text-2xl md:text-4xl font-bold">{q.question}</h3>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="p-3 bg-muted rounded-md">
-                            <span className="font-semibold">A:</span> {q.optionA}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+                          <div className="p-6 bg-muted rounded-xl text-xl md:text-2xl font-semibold">
+                            <span className="font-bold">A:</span> {q.optionA}
                           </div>
-                          <div className="p-3 bg-muted rounded-md">
-                            <span className="font-semibold">B:</span> {q.optionB}
+                          <div className="p-6 bg-muted rounded-xl text-xl md:text-2xl font-semibold">
+                            <span className="font-bold">B:</span> {q.optionB}
                           </div>
                         </div>
                       </div>

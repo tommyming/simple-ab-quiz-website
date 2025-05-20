@@ -29,6 +29,14 @@ export default function DisplayQuestions() {
     const savedQuestions = localStorage.getItem("abQuestions")
     if (savedQuestions) {
       setQuestions(JSON.parse(savedQuestions))
+    } else {
+      // Fetch from API if not in localStorage
+      fetch("/api/questions")
+        .then((res) => res.json())
+        .then((data) => {
+          setQuestions(data)
+          localStorage.setItem("abQuestions", JSON.stringify(data))
+        })
     }
 
     const savedTitle = localStorage.getItem("quizTitle")
@@ -108,6 +116,11 @@ export default function DisplayQuestions() {
     updatedQuestions[currentIndex].selectedOption = option
 
     setQuestions(updatedQuestions)
+
+    // Go to next question if not last
+    if (currentIndex < questions.length - 1) {
+      setTimeout(() => setCurrentIndex(currentIndex + 1), 200)
+    }
   }
 
   return (
@@ -130,41 +143,39 @@ export default function DisplayQuestions() {
       </div>
 
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="max-w-4xl w-full">
-          <Card className="p-8 md:p-12">
-            <CardContent className="p-0 flex flex-col items-center text-center space-y-6">
-              <h2 className="text-2xl md:text-4xl font-bold">{currentQuestion.question}</h2>
+        <div className="w-4/5">
+          <Card className="p-8 md:p-20 border-0 shadow-none">
+            <CardContent className="p-0 flex flex-col items-center text-center space-y-10">
+              <h2 className="text-3xl md:text-6xl font-bold">{currentQuestion.question}</h2>
 
-              <div className={`grid ${isMobile ? "grid-rows-2 gap-6" : "grid-cols-2 gap-12"} w-full mt-6`}>
+              <div className={`grid ${isMobile ? "grid-rows-2 gap-10" : "grid-cols-2 gap-20"} w-full mt-10`}>
                 <button
                   onClick={() => handleVote("A")}
-                  className={`flex flex-col items-center justify-center p-6 
+                  className={`flex flex-col items-center justify-center p-10 md:p-16 text-2xl md:text-4xl font-semibold
                     ${
                       currentQuestion.selectedOption === "A"
                         ? "bg-red-500 text-white"
                         : "bg-transparent text-gray-800 hover:bg-gray-100"
                     } 
-                    rounded-lg border-2 ${
+                    rounded-2xl border-4 ${
                       currentQuestion.selectedOption === "A" ? "border-red-600" : "border-gray-300"
-                    } min-h-[150px] transition-colors`}
+                    } min-h-[200px] md:min-h-[300px] transition-colors`}
                 >
-                  <span className="text-xl md:text-3xl font-bold mb-2">A</span>
-                  <span className="text-lg md:text-2xl">{currentQuestion.optionA}</span>
+                  <span className="text-4xl md:text-6xl font-bold">{currentQuestion.optionA}</span>
                 </button>
                 <button
                   onClick={() => handleVote("B")}
-                  className={`flex flex-col items-center justify-center p-6 
+                  className={`flex flex-col items-center justify-center p-10 md:p-16 text-2xl md:text-4xl font-semibold
                     ${
                       currentQuestion.selectedOption === "B"
                         ? "bg-blue-500 text-white"
                         : "bg-transparent text-gray-800 hover:bg-gray-100"
                     } 
-                    rounded-lg border-2 ${
+                    rounded-2xl border-4 ${
                       currentQuestion.selectedOption === "B" ? "border-blue-600" : "border-gray-300"
-                    } min-h-[150px] transition-colors`}
+                    } min-h-[200px] md:min-h-[300px] transition-colors`}
                 >
-                  <span className="text-xl md:text-3xl font-bold mb-2">B</span>
-                  <span className="text-lg md:text-2xl">{currentQuestion.optionB}</span>
+                  <span className="text-4xl md:text-6xl font-bold">{currentQuestion.optionB}</span>
                 </button>
               </div>
             </CardContent>
