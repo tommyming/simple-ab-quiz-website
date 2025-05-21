@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
 
 interface Question {
   id: string
@@ -21,13 +22,29 @@ interface Question {
   selectedOption?: "A" | "B" | null
 }
 
+// Import characteristic pairs for analysis
+const CHARACTERISTIC_PAIRS = [
+  "Collaborative vs Independent",
+  "Detail-oriented vs Big-picture thinker",
+  "Proactive vs Reactive",
+  "Flexible vs Structured",
+  "Risk-taker vs Risk-averse",
+  "Specialist vs Generalist",
+  "Analytical vs Creative",
+  "Fast-paced vs Methodical",
+  "Introverted vs Extroverted",
+  "Process-driven vs Results-driven"
+]
+
 export default function CreateQuestions() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [newQuestion, setNewQuestion] = useState("")
   const [optionA, setOptionA] = useState("")
   const [optionB, setOptionB] = useState("")
   const [title, setTitle] = useState("Your Quiz Title")
+  const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const router = useRouter()
 
   // Load questions from localStorage on component mount
   useEffect(() => {
@@ -100,6 +117,44 @@ export default function CreateQuestions() {
         title: "All questions cleared",
         description: "All your questions have been removed",
       })
+    }
+  }
+
+  // Handle analyze - triggers AI analysis and redirects to results
+  const handleAnalyze = async () => {
+    setLoading(true)
+    try {
+      // Collect answers for each question (A or B)
+      const answers = questions.map(q => {
+        if (q.selectedOption === "A") return q.optionA
+        if (q.selectedOption === "B") return q.optionB
+        return "No answer"
+      })
+      
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          questions,
+          answers,
+          characteristics: CHARACTERISTIC_PAIRS
+        })
+      })
+      
+      if (!res.ok) throw new Error("Failed to analyze")
+      const data = await res.json()
+      
+      // Store analysis results in localStorage so results page can access them
+      localStorage.setItem("aiAnalysis", JSON.stringify(data))
+      
+      // Navigate to results page
+      router.push("/results")
+    } catch (error) {
+      console.error("Analysis failed:", error)
+      // Navigate to results page anyway, the error will be shown there
+      router.push("/results")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -202,11 +257,15 @@ export default function CreateQuestions() {
                 Clear All Questions
               </Button>
               <div className="flex gap-3">
-                <Button asChild variant="outline">
-                  <Link href="/results">View Results</Link>
+                <Button 
+                  variant="outline"
+                  onClick={handleAnalyze}
+                  disabled={loading}
+                >
+                  {loading ? "Analyzing..." : "Analyze"}
                 </Button>
                 <Button asChild>
-                  <Link href="/display">Display Questions</Link>
+                  <Link href="/">View Questions</Link>
                 </Button>
               </div>
             </div>
