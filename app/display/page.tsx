@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight, Home } from "lucide-react"
 import { useMobile } from "@/hooks/use-mobile"
+import { useRouter } from "next/navigation"
 
 interface Question {
   id: string
@@ -19,11 +20,27 @@ interface Question {
   selectedOption?: "A" | "B" | null
 }
 
+// Import characteristic pairs for analysis
+const CHARACTERISTIC_PAIRS = [
+  "Collaborative vs Independent",
+  "Detail-oriented vs Big-picture thinker",
+  "Proactive vs Reactive",
+  "Flexible vs Structured",
+  "Risk-taker vs Risk-averse",
+  "Specialist vs Generalist",
+  "Analytical vs Creative",
+  "Fast-paced vs Methodical",
+  "Introverted vs Extroverted",
+  "Process-driven vs Results-driven"
+]
+
 export default function DisplayQuestions() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [loading, setLoading] = useState(false)
   const isMobile = useMobile()
   const [title, setTitle] = useState("Your Quiz Title")
+  const router = useRouter()
 
   useEffect(() => {
     const savedQuestions = localStorage.getItem("abQuestions")
@@ -61,6 +78,44 @@ export default function DisplayQuestions() {
   const handlePrevious = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1)
+    }
+  }
+
+  // Handle analyze - triggers AI analysis and redirects to results
+  const handleAnalyze = async () => {
+    setLoading(true)
+    try {
+      // Collect answers for each question (A or B)
+      const answers = questions.map(q => {
+        if (q.selectedOption === "A") return q.optionA
+        if (q.selectedOption === "B") return q.optionB
+        return "No answer"
+      })
+      
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          questions,
+          answers,
+          characteristics: CHARACTERISTIC_PAIRS
+        })
+      })
+      
+      if (!res.ok) throw new Error("Failed to analyze")
+      const data = await res.json()
+      
+      // Store analysis results in localStorage so results page can access them
+      localStorage.setItem("aiAnalysis", JSON.stringify(data))
+      
+      // Navigate to results page
+      router.push("/results")
+    } catch (error) {
+      console.error("Analysis failed:", error)
+      // Navigate to results page anyway, the error will be shown there
+      router.push("/results")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -133,8 +188,12 @@ export default function DisplayQuestions() {
               <span className="sr-only">Home</span>
             </Link>
           </Button>
-          <Button asChild variant="outline">
-            <Link href="/results">View Results</Link>
+          <Button 
+            variant="outline"
+            onClick={handleAnalyze}
+            disabled={loading}
+          >
+            {loading ? "Analyzing..." : "Analyze"}
           </Button>
         </div>
         <div className="text-sm text-muted-foreground">
